@@ -9,8 +9,9 @@ public class CorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        String frontendUrl = System.getenv().getOrDefault("FRONTEND_URL", "http://localhost:5500");
         registry.addMapping("/**")
-                .allowedOrigins("https://ai-chatbot-frontend-y23w.onrender.com")
+                .allowedOrigins(frontendUrl)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
     }
