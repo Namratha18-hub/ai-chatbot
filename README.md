@@ -2,24 +2,26 @@
 
 A full-stack AI chatbot built with **Java Spring Boot**, **Google Gemini**, **MySQL**, and a responsive **HTML/CSS/JavaScript** frontend.
 
-The application supports AI conversations, conversation history, editing, regeneration, clearing conversations, theme switching, and persistent storage.
+The app supports AI conversations, conversation history, message editing, response regeneration, conversation clearing, a light/dark theme, and persistent storage.
+
+---
 
 ## 🚀 Live Demo
 
-**Frontend:**  
-https://ai-chatbot-frontend-y23w.onrender.com/
+| Part | URL |
+|---|---|
+| Frontend | https://YOUR-FRONTEND-URL.onrender.com |
+| Backend API | https://ai-chatbot-e8u1.onrender.com |
 
-**Backend API:**  
-https://ai-chatbot-a8it.onrender.com
-
-> The backend root URL may display a Spring Boot Whitelabel 404 page because there is no `/` route. The API endpoints are working normally.
+> **Note:** The backend runs on a free Render instance, which sleeps when idle. The first request after a period of inactivity can take **about 50 seconds**. After that it responds normally.
+>
+> Opening the backend root URL shows a Spring Boot "Whitelabel Error Page" (404). This is expected, because the backend is an API with no page at `/`.
 
 ---
 
 ## ✨ Features
 
-- 🤖 AI-powered chat using Google Gemini
-- 💬 Send and receive AI messages
+- 🤖 AI chat powered by Google Gemini (`gemini-2.5-flash`)
 - 🆕 Create new conversations
 - 🗂️ Conversation history
 - 🗑️ Delete conversations
@@ -28,241 +30,280 @@ https://ai-chatbot-a8it.onrender.com
 - 🧹 Clear conversation messages
 - 📋 Copy AI responses
 - 🌙 Light and dark theme
-- 💾 Persistent conversation storage using MySQL
-- 🌐 Deployed frontend and backend
+- 💾 Persistent storage with MySQL
 - 🔐 Environment-variable based configuration
 - 🔗 REST API architecture
-- 📱 Responsive frontend UI
+- 📱 Responsive UI
 
 ---
 
 ## 🛠️ Technologies Used
 
-### Backend
-
+**Backend**
 - Java 21
 - Spring Boot 4
 - Spring Web
-- Spring Data JPA
-- Hibernate
+- Spring Data JPA / Hibernate
 - Maven
 - MySQL
 - Google Gemini API
 
-### Frontend
-
+**Frontend**
 - HTML5
 - CSS3
-- JavaScript
-- Fetch API
+- JavaScript (Fetch API)
+- marked.js (Markdown rendering)
 
-### Deployment
-
+**Deployment**
 - GitHub
-- Render
-- Aiven MySQL
+- Render (backend web service and frontend static site)
+- Aiven (managed MySQL)
+- Docker
 
 ---
 
 ## 📁 Project Structure
 
-```text
-chatbot/
-│
+```
+ai-chatbot/
 ├── src/
 │   └── main/
-│       ├── java/
-│       │   └── com/
-│       │       └── chatbot/
-│       │           └── chatbot/
-│       │               ├── ChatbotApplication.java
-│       │               ├── ChatController.java
-│       │               ├── ConversationController.java
-│       │               ├── Conversation.java
-│       │               ├── ConversationRepository.java
-│       │               ├── Message.java
-│       │               ├── MessageRepository.java
-│       │               ├── GeminiService.java
-│       │               └── CorsConfig.java
-│       │
+│       ├── java/com/chatbot/chatbot/
+│       │   ├── ChatbotApplication.java
+│       │   ├── ChatController.java
+│       │   ├── ChatService.java
+│       │   ├── ChatRequest.java
+│       │   ├── ChatMessage.java
+│       │   ├── ChatMessageRepository.java
+│       │   ├── Conversation.java
+│       │   ├── ConversationController.java
+│       │   ├── ConversationService.java
+│       │   ├── ConversationRepository.java
+│       │   ├── GeminiService.java
+│       │   ├── GeminiApiException.java
+│       │   ├── GeminiAuthenticationException.java
+│       │   ├── GeminiQuotaException.java
+│       │   └── CorsConfig.java
 │       └── resources/
 │           └── application.properties
-│
 ├── frontend/
 │   ├── index.html
 │   ├── style.css
-│   └── script.js
-│
+│   ├── script.js
+│   └── marked.min.js
 ├── Dockerfile
 ├── pom.xml
 ├── mvnw
 ├── mvnw.cmd
+├── .env.example
 ├── .gitignore
 └── README.md
+```
 
-⚙️ Backend Configuration
+---
 
-The application uses environment variables for sensitive configuration.
+## ⚙️ Environment Variables
 
-Example:
+The backend reads its configuration from environment variables.
 
-spring.application.name=chatbot
+| Variable | Description | Example |
+|---|---|---|
+| `GEMINI_API_KEY` | Google Gemini API key from [Google AI Studio](https://aistudio.google.com) | `AIza...` |
+| `MYSQL_URL` | JDBC connection URL for MySQL | `jdbc:mysql://HOST:PORT/defaultdb?sslMode=REQUIRED` |
+| `MYSQL_USERNAME` | Database username | `avnadmin` |
+| `MYSQL_PASSWORD` | Database password | `your_password` |
+| `FRONTEND_URL` | Allowed frontend origin for CORS (no trailing `/`) | `https://your-frontend.onrender.com` |
 
-spring.datasource.url=${MYSQL_URL:jdbc:mysql://localhost:3306/ai_chatbot?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-spring.datasource.username=${MYSQL_USERNAME:root}
-spring.datasource.password=${MYSQL_PASSWORD:}
+If not set, these defaults apply for local development:
 
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-Required Environment Variables
-GEMINI_API_KEY
-MYSQL_URL
-MYSQL_USERNAME
-MYSQL_PASSWORD
+- `MYSQL_URL` → `jdbc:mysql://localhost:3306/ai_chatbot?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true`
+- `MYSQL_USERNAME` → `root`
+- `MYSQL_PASSWORD` → empty
+- `FRONTEND_URL` → `http://localhost:5500`
 
-For local development, these values can be configured using environment variables.
+`GEMINI_API_KEY` has no default and must always be set.
 
-Do not commit API keys or database passwords to GitHub.
+---
 
-🗄️ Database
+## 🔌 API Endpoints
 
-The application uses MySQL to persist:
+### Conversations
 
-Conversations
-User messages
-AI responses
-Conversation titles
-Message timestamps
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/conversations` | Get all conversations |
+| POST | `/api/conversations` | Create a conversation |
+| GET | `/api/conversations/{id}/messages` | Get messages of a conversation |
+| DELETE | `/api/conversations/{id}` | Delete a conversation |
 
-The production database is hosted on Aiven MySQL.
+### Chat
 
-🔌 API Endpoints
-Conversations
-Get all conversations
-GET /api/conversations
-Create a conversation
-POST /api/conversations
-Get conversation messages
-GET /api/conversations/{id}/messages
-Delete a conversation
-DELETE /api/conversations/{id}
-Chat
-Send a message
-POST /api/chat?conversationId={id}
-Regenerate response
-POST /api/chat/regenerate?conversationId={id}
-Edit message
-POST /api/chat/edit?conversationId={id}
-Clear conversation
-POST /api/chat/clear?conversationId={id}
-💻 Run Locally
-1. Clone the repository
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/chat?conversationId={id}` | Send a message |
+| POST | `/api/chat/regenerate?conversationId={id}` | Regenerate the last AI response |
+| POST | `/api/chat/edit?conversationId={id}` | Edit a message |
+| POST | `/api/chat/clear?conversationId={id}` | Clear all messages in a conversation |
+
+---
+
+## 💻 Run Locally
+
+### Prerequisites
+- Java 21
+- MySQL running locally
+- A Gemini API key
+- Python 3 (only to serve the frontend, any static server works)
+
+### 1. Clone the repository
+```bash
 git clone https://github.com/Namratha18-hub/ai-chatbot.git
 cd ai-chatbot
-2. Configure the database and Gemini API
+```
 
-Set the required environment variables:
+### 2. Create the database
+```sql
+CREATE DATABASE ai_chatbot;
+```
+Tables are created automatically on first start (`spring.jpa.hibernate.ddl-auto=update`).
 
-GEMINI_API_KEY
-MYSQL_URL
-MYSQL_USERNAME
-MYSQL_PASSWORD
-3. Start the backend
+### 3. Set environment variables
 
-On Windows:
+**Windows (PowerShell):**
+```powershell
+$env:GEMINI_API_KEY="your_gemini_api_key"
+$env:MYSQL_USERNAME="root"
+$env:MYSQL_PASSWORD="your_mysql_password"
+```
 
+**macOS / Linux:**
+```bash
+export GEMINI_API_KEY="your_gemini_api_key"
+export MYSQL_USERNAME="root"
+export MYSQL_PASSWORD="your_mysql_password"
+```
+
+### 4. Start the backend
+```bash
+# Windows
 .\mvnw.cmd spring-boot:run
 
-The backend will run on:
+# macOS / Linux
+./mvnw spring-boot:run
+```
+The backend runs at `http://localhost:8080`.
 
+### 5. Point the frontend at your local backend
+In `frontend/script.js`, change the backend URL at the top of the file from the deployed URL to:
+```
 http://localhost:8080
-4. Start the frontend
+```
+(Change it back to your deployed backend URL before pushing to production.)
 
-Open another terminal:
-
+### 6. Start the frontend
+In a second terminal:
+```bash
 cd frontend
 python -m http.server 5500
+```
+Open **http://localhost:5500**.
 
-Then open:
+---
 
-http://localhost:5500
-🐳 Docker
-
-The application can also be built and run using Docker.
+## 🐳 Docker
 
 Build the image:
-
+```bash
 docker build -t ai-chatbot .
+```
 
 Run the container:
+```bash
+docker run -p 8080:8080 \
+  -e GEMINI_API_KEY=your_key \
+  -e MYSQL_URL="jdbc:mysql://HOST:PORT/DB?sslMode=REQUIRED" \
+  -e MYSQL_USERNAME=your_user \
+  -e MYSQL_PASSWORD=your_password \
+  -e FRONTEND_URL=http://localhost:5500 \
+  ai-chatbot
+```
 
-docker run -p 8080:8080 ai-chatbot
+---
 
-Environment variables should be provided when running the container.
+## 🌐 Deployment Guide
 
-🌐 Deployment
-
-The project is deployed using:
-
+```
 GitHub
-   │
-   ├── Frontend → Render Static Site
-   │
-   └── Backend → Render Web Service
-                    │
-                    └── Aiven MySQL
-Production Frontend
-https://ai-chatbot-frontend-y23w.onrender.com/
-Production Backend
-https://ai-chatbot-a8it.onrender.com
+  ├── Frontend → Render Static Site
+  └── Backend  → Render Web Service (Docker) → Aiven MySQL
+```
 
-The frontend communicates with the production backend through REST API requests.
+### 1. Database (Aiven)
+1. Create a free **MySQL** service on [Aiven](https://aiven.io) and wait for it to be **Running**.
+2. Copy the host, port, user, password, and database name.
+3. Build the JDBC URL:
+   ```
+   jdbc:mysql://HOST:PORT/defaultdb?sslMode=REQUIRED
+   ```
 
-🔐 Security
+### 2. Backend (Render Web Service)
+1. On [Render](https://render.com), click **New → Web Service** and select this repository.
+2. Set **Language** to **Docker**, **Branch** to `main`, and **Instance Type** to **Free**.
+3. Add the environment variables: `GEMINI_API_KEY`, `MYSQL_URL`, `MYSQL_USERNAME`, `MYSQL_PASSWORD`.
+4. Deploy, then verify it works by opening `https://YOUR-BACKEND-URL/api/conversations`. It should return `[]`.
 
-Sensitive information should be stored in environment variables rather than source code.
+### 3. Frontend (Render Static Site)
+1. In `frontend/script.js`, set every API URL to your backend URL, then commit and push.
+2. On Render, click **New → Static Site** and select this repository.
+3. Set **Root Directory** to `frontend`, leave **Build Command** empty, and set **Publish Directory** to `.`.
+4. Deploy and copy the frontend URL.
 
-Do not commit:
+### 4. Connect them (CORS)
+Add `FRONTEND_URL` to the backend's environment variables with your frontend URL (no trailing `/`), then save so the backend redeploys.
 
-Gemini API keys
-Database passwords
-.env files
-Private certificates
-Other credentials
+### Updating the deployed app
+```bash
+git add .
+git commit -m "Describe your change"
+git push
+```
+Render redeploys automatically after each push.
 
-The repository includes a .gitignore to help prevent sensitive files from being committed.
+---
 
-📌 Important Note
+## 🧰 Troubleshooting
 
-The backend does not provide a webpage at /.
+| Problem | Likely cause and fix |
+|---|---|
+| First message takes about 50 seconds | Normal. The free Render instance is waking up. |
+| CORS error in the browser console | `FRONTEND_URL` doesn't exactly match the frontend URL (check `https://` and that there is no trailing `/`). |
+| `GEMINI_API_KEY environment variable is not set` | Add the variable to the backend's environment settings. |
+| Database connection errors | Check `MYSQL_URL`, username, and password, and confirm the Aiven service is running. |
+| Quota or authentication error in chat | The Gemini free-tier limit was reached, or the API key is invalid. |
+| Frontend can't reach the backend | The API URLs in `frontend/script.js` don't point to the current backend. |
 
-Therefore, opening:
+---
 
-https://ai-chatbot-a8it.onrender.com/
+## 🔐 Security
 
-may display:
+Never commit any of the following to GitHub:
 
-Whitelabel Error Page
-404 Not Found
+- Gemini API keys
+- Database passwords
+- `.env` files
+- Private certificates or other credentials
 
-This is expected.
+Use environment variables instead. The repository includes a `.gitignore` and a `.env.example` file to help with this.
 
-The backend is an API service and is accessed through endpoints such as:
+---
 
-/api/chat
-/api/conversations
+## 👩‍💻 Author
 
-The user-facing application is the frontend:
+**Namratha**
+GitHub: [@Namratha18-hub](https://github.com/Namratha18-hub)
 
-https://ai-chatbot-frontend-y23w.onrender.com/
-👩‍💻 Author
+---
 
-Namratha
-
-GitHub:
-
-https://github.com/Namratha18-hub
 ## 📄 License
 
 This project is intended for educational and demonstration purposes.
