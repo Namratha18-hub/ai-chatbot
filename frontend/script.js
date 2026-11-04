@@ -1,17 +1,17 @@
 const API_URL =
-    "https://ai-chatbot-a8it.onrender.com/api/chat";
+    "https://ai-chatbot-e8u1.onrender.com/api/chat";
 
 const REGENERATE_API_URL =
-    "https://ai-chatbot-a8it.onrender.com/api/chat/regenerate";
+    "https://ai-chatbot-e8u1.onrender.com/api/chat/regenerate";
 
 const EDIT_API_URL =
-    "https://ai-chatbot-a8it.onrender.com/api/chat/edit";
+    "https://ai-chatbot-e8u1.onrender.com/api/chat/edit";
 
 const CLEAR_API_URL =
-    "https://ai-chatbot-a8it.onrender.com/api/chat/clear";
+    "https://ai-chatbot-e8u1.onrender.com/api/chat/clear";
 
 const CONVERSATIONS_API_URL =
-    "https://ai-chatbot-a8it.onrender.com/api/conversations";
+    "https://ai-chatbot-e8u1.onrender.com/api/conversations";
 
 
 const messagesContainer =
